@@ -114,7 +114,7 @@ static CV_PossibleValue_t cons_musicpref_t[] = {
 	{1, "MIDI"},
 	{0, NULL}
 };
-consvar_t cv_musicpref = CVAR_INIT ("musicpref", "Digital", CV_SAVE|CV_CALL|CV_NOINIT, cons_musicpref_t, MusicPref_OnChange);
+consvar_t cv_musicpref = CVAR_INIT ("musicpref", "Digital", CV_SAVE|CV_CALL|CV_NOINIT|CV_ALLOWLUA, cons_musicpref_t, MusicPref_OnChange);
 
 // Window focus sound sytem toggles
 consvar_t cv_playmusicifunfocused = CVAR_INIT ("playmusicifunfocused", "No", CV_SAVE, CV_YesNo, NULL);

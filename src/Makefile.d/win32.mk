@@ -3,9 +3,9 @@
 #
 
 ifndef MINGW64
-EXENAME?=srb2src.exe
+EXENAME?=srb2gub.exe
 else
-EXENAME?=srb2src64.exe
+EXENAME?=srb2gub64.exe
 endif
 
 # disable dynamicbase if under msys2

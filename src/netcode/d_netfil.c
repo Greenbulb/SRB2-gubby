@@ -1902,6 +1902,38 @@ filestatus_t findfile(char *filename, const UINT8 *wantedmd5sum, boolean complet
 		return (*wantedmd5sum) & 1 ? FS_MD5SUMBAD : FS_NOTFOUND;
 	}
 
+	{
+		if (cv_addons_option.value == 3 && *cv_addons_folder.string != '\0')
+		{
+			// first, check any custom directory if specified
+			homecheck = filesearch(filename, cv_addons_folder.string, wantedmd5sum, completepath, 10);
+
+			if (homecheck == FS_FOUND) // we found the file, so return that we have :)
+				return FS_FOUND;
+			else if (homecheck == FS_MD5SUMBAD) // file has a bad md5; move on and look for a file with the right md5
+				badmd5 = true;
+			// if not found at all, just move on without doing anything
+		}
+
+		// next, check "DOWNLOAD" directory
+		homecheck = filesearch(filename, "DOWNLOAD", wantedmd5sum, completepath, 10);
+
+		if (homecheck == FS_FOUND) // we found the file, so return that we have :)
+			return FS_FOUND;
+		else if (homecheck == FS_MD5SUMBAD) // file has a bad md5; move on and look for a file with the right md5
+			badmd5 = true;
+		// if not found at all, just move on without doing anything
+
+		// next, check "addons" directory
+		homecheck = filesearch(filename, "addons", wantedmd5sum, completepath, 10);
+
+		if (homecheck == FS_FOUND) // we found the file, so return that we have :)
+			return FS_FOUND;
+		else if (homecheck == FS_MD5SUMBAD) // file has a bad md5; move on and look for a file with the right md5
+			badmd5 = true;
+		// if not found at all, just move on without doing anything
+	}
+	
 	// first, check SRB2's "home" directory
 	homecheck = filesearch(filename, srb2home, wantedmd5sum, completepath, 10);
 

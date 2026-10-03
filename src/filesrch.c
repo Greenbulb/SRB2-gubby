@@ -393,7 +393,6 @@ static const char *exclude_paths[] = {
 	"models",
 	"movies",
 	"screenshots",
-	"luafiles",
 	"replay",
 	"sf2",
 	NULL
@@ -572,9 +571,6 @@ INT32 pathisdirectory(const char *path)
 
 	if (stat(path, &fsstat) < 0)
 	{
-#ifndef AVOID_ERRNO
-		direrror = errno;
-#endif
 		return -1;
 	}
 	else if (S_ISDIR(fsstat.st_mode))
@@ -589,10 +585,11 @@ INT32 pathisdirectory(const char *path)
 		return -1;
 	}
 	else if (fileattr & FILE_ATTRIBUTE_DIRECTORY)
-	{	
+	{
 		return 1;
 	}
 #endif
+
 	return 0;
 }
 

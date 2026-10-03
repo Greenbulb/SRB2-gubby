@@ -389,6 +389,9 @@ static void CL_DrawConnectionStatus(void)
 				break;
 		}
 		V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-24, MENUHIGHLIGHT|V_ALLOWLOWERCASE, cltext);
+
+		if (cl_mode == CL_ASKJOIN || cl_mode == CL_WAITJOINRESPONSE)
+			CL_DrawServerTitle();
 	}
 	else
 	{
@@ -631,8 +634,8 @@ static void CL_DrawConnectionStatus(void)
 
 				V_DrawFill(8, ypos, BASEVIDWIDTH - 16, 54, M_GetMenuBGColor(MENUBACKCOLOR, MC_BASE));
 
-				V_DrawCenteredThinString(160, ypos+12, V_ALLOWLOWERCASE, "This server is full!");
-				V_DrawCenteredThinString(160, ypos+22, V_ALLOWLOWERCASE, "You may download server addons, and wait for a slot.");
+				V_DrawCenteredThinString(160, ypos+22, V_ALLOWLOWERCASE, "This server is full!");
+				V_DrawCenteredThinString(160, ypos+32, V_ALLOWLOWERCASE, "You may download server addons, and wait for a slot.");
 
 				V_DrawThinString(12, ypos+2, V_ALLOWLOWERCASE, va("%s", serverlist[joinnode].info.servername));
 				UINT32 ping = (UINT32)serverlist[joinnode].info.time;
@@ -646,6 +649,18 @@ static void CL_DrawConnectionStatus(void)
 						(ping < 128 ? "\x83" : (ping < 256 ? "\x82" : "\x85")),
 						ping
 					));
+
+				// modified server
+				if (fileneedednum > 0)
+					V_DrawThinString(12, ypos+42, V_ALLOWLOWERCASE|V_ORANGEMAP, va("%i Addons", fileneedednum));
+				else
+					V_DrawThinString(12, ypos+42, V_ALLOWLOWERCASE|V_YELLOWMAP, "Vanilla");
+				
+				// server type
+				if (serverlist[joinnode].info.flags & SV_DEDICATED)
+					V_DrawRightAlignedThinString(BASEVIDWIDTH - 12, ypos+42, V_ALLOWLOWERCASE|V_ORANGEMAP, "Dedicated");
+				else
+					V_DrawRightAlignedThinString(BASEVIDWIDTH - 12, ypos+42, V_ALLOWLOWERCASE|V_GREENMAP, "Listen Server");
 			}
 			else
 				CL_DrawServerTitle();
@@ -657,12 +672,11 @@ static void CL_DrawConnectionStatus(void)
 			const char *sizestr = GetPrintableFileSize(filedownload.totalsize);
 			V_DrawRightAlignedThinString(BASEVIDWIDTH - 18, ypos + 59,
 				V_ALLOWLOWERCASE|MENUHIGHLIGHT,
-				va("%s total", sizestr)
+				va("%s needed", sizestr)
 			);
 
 			INT32 i;
 			INT32 count = 0;
-			INT32 checkered = cl_vs_sa_scroll;
 			INT32 totalcounted = fileneedednum;
 
 			INT32 x = 14;
@@ -676,18 +690,13 @@ static void CL_DrawConnectionStatus(void)
 			for (i = cl_vs_sa_scroll; i < fileneedednum; i++)
 			{
 				fileneeded_t addon_file = fileneeded[i];
-				if (!addon_file.isdownloadable)
-				{
-					totalcounted--;
-					continue;
-				}
+				boolean alreadyhave = !addon_file.isdownloadable;
 
-				if (checkered & 1)
+				if (i & 1)
 					V_DrawFill(x,y-1,
 						288, 9,
 						M_GetMenuBGColor(MENUBACKCOLOR, MC_CHECKER)
 					);
-				checkered++;
 
 				strncpy(file_name, addon_file.filename, MAX_WADPATH);
 				INT32 len = strlen(file_name);
@@ -697,16 +706,23 @@ static void CL_DrawConnectionStatus(void)
 				else
 					strncpy(namescrollbuf, file_name, sizeof(namescrollbuf) - 1);
 
-				V_DrawThinString(x, y, V_ALLOWLOWERCASE|V_6WIDTHSPACE,
+				V_DrawThinString(x, y, V_ALLOWLOWERCASE|V_6WIDTHSPACE|(alreadyhave ? V_TRANSLUCENT : 0),
 					va("%s[%.2d]\x80 %s", V_GetStringColorCode(MENUHIGHLIGHT), i+1, namescrollbuf)
 				);
 
-				// File size
-				const char *statusstr = addon_file.status == FS_NOTFOUND ? "Missing" : "Version mismatch";
-				V_DrawRightAlignedThinString(x + 288 - 1,
-					y, MENUHIGHLIGHT|V_ALLOWLOWERCASE,
-					statusstr
-				);
+				if (!alreadyhave)
+				{
+					const char *statusstr = addon_file.status == FS_NOTFOUND ? "Missing" : "Version mismatch";
+					V_DrawRightAlignedThinString(x + 288 - 1,
+						y, MENUHIGHLIGHT|V_ALLOWLOWERCASE,
+						statusstr
+					);
+				}
+				else
+					V_DrawRightAlignedThinString(x + 288 - 1,
+						y, MENUHIGHLIGHT|V_ALLOWLOWERCASE|V_TRANSLUCENT,
+						"Installed"
+					);
 
 				y += 9;
 				count++;
@@ -1720,17 +1736,19 @@ static boolean CL_ServerConnectionTicker(const char *tmpsave, tic_t *oldtic, tic
 				S_StartSound(NULL, sfx_menu1);
 			}
 			
-			INT32 i;
 			INT32 filestoscroll = fileneedednum;
 			// i was originally going to use filedownload.remaining, but
 			// it doesnt seem like thats set right now, so lets just count
 			// how many files we need to download here
+			/*
 			if (cl_mode == CL_CONFIRMCONNECT && fileneeded)
 			{
 				for (i = 0; i < fileneedednum; i++)
 					if (!fileneeded[i].isdownloadable)
 						filestoscroll--;
 			}
+			CONS_Printf("toscroll: %d, %d\n", filestoscroll, fileneedednum);
+			*/
 
 			if ((cl_vs_showaddons || cl_mode == CL_CONFIRMCONNECT) && filestoscroll > MAXBIGADDONS)
 			{

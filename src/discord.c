@@ -21,6 +21,7 @@
 #include "netcode/mserv.h" // cv_masterserver_room_id
 #include "netcode/i_tcp.h" // current_port
 #include "netcode/server_connection.h" // current_port
+#include "netcode/client_connection.h"
 #include "g_game.h"
 #include "p_tick.h"
 #include "m_menu.h" // gametype_cons_t
@@ -547,6 +548,8 @@ void DRPC_UpdatePresence(void)
 		}
 		else if (demoplayback && !titledemo)
 			discordPresence.state = "Watching Replay";
+		else if (cl_mode != CL_SEARCHING)
+			discordPresence.state = "Joining a netgame";
 		else
 			discordPresence.state = "In the menus";
 	}

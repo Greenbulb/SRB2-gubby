@@ -49,6 +49,8 @@ Please refer to `libs/DLL-README.txt` if you need help locating any libraries. *
 
 **NOTE: You will need to be logged into a GitHub account if you want to download from the Actions tab.**
 
+**NOTE: If your browser won't let you download the zip file of the binary, then Lol. You might have to disable your antivirus to download the zip, then reenable it once it is finished. I'm not sure why this happens, but SRB2-edit does not contain malicious code at all, you are free to compile your own binary if you wish to.**
+
 <p align="center">
   <img width="2120" height="930" alt="Z68HSlSh4r" src="https://github.com/user-attachments/assets/8fb3b807-13f3-42cf-a357-56816802dae9" />
 </p>

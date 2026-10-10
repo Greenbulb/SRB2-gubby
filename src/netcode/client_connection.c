@@ -162,53 +162,6 @@ static void DrawOverallProgress(int y)
 	V_DrawRightAlignedString(BASEVIDWIDTH/2+128, y, V_20TRANS|V_ALLOWLOWERCASE, va("%2u/%2u Files ", downloadedfiles+1, totalfiles));
 }
 
-//
-// GamepadGlyphs
-//
-// Draws a little 4-faced gamepad glyph
-// highlighting `offset`'s button, centered at x,y
-//
-static void GamepadGlyphs(INT32 x, INT32 y, INT32 offset)
-{
-	/*
-		KEY_JOY1 + 
-		0: a
-		1: b
-		2: x
-		3: y
-	*/
-	static INT32 order[4][2] = {
-		{0, 1}, // bottom
-		{1, 0}, // right
-		{-1,0}, // left
-		{0,-1}  // top
-	};
-	static INT32 xbox2nintendo[4] = { // Bruh
-		1, 0, 3, 2
-	};
-	static INT32 xoffset = 3;
-	static INT32 yoffset = 3;
-	INT32 i;
-
-	if (cv_joynintendo.value)
-	{
-		offset = xbox2nintendo[offset];
-	}
-
-	for (i = 0; i < 4; i++) {
-		V_DrawFill(
-			x + xoffset*order[i][0] - 1,
-			y + yoffset*order[i][1],
-			3,3, 26
-		);
-		V_DrawFill(
-			x + xoffset*order[i][0] - 1,
-			y + yoffset*order[i][1],
-			2,2, (i == offset) ? M_GetMenuColor(MENUHIGHLIGHT, 3) : 23
-		);
-	}
-}
-
 // draws the servername, level pic, etc for the server
 static void CL_DrawServerTitle(void)
 {
@@ -291,7 +244,7 @@ static void CL_DrawServerTooltips(const char *accepttext, boolean canchangetabs)
 			16 + V_ThinStringWidth("[ESC] ", 0), BASEVIDHEIGHT - (ypos+15),
 			V_ALLOWLOWERCASE, "= Back"
 		);
-		GamepadGlyphs(16 + V_ThinStringWidth("[ESC] ", 0) - 7, BASEVIDHEIGHT - (ypos+15 - 2), 1);
+		V_DrawGamepadGlyph(16 + V_ThinStringWidth("[ESC] ", 0) - 7, BASEVIDHEIGHT - (ypos+15 - 2), false, 0, 1, -1,-1,-1);
 
 		if (canchange)
 		{	
@@ -304,14 +257,14 @@ static void CL_DrawServerTooltips(const char *accepttext, boolean canchangetabs)
 				V_ALLOWLOWERCASE,
 				va(" = %s", (cl_vs_showaddons ? "Players" : "Addons"))
 			);
-			GamepadGlyphs(BASEVIDWIDTH/2 + partx - 6, BASEVIDHEIGHT - (ypos+15 - 2), 2);
+			V_DrawGamepadGlyph(BASEVIDWIDTH/2 + partx - 6, BASEVIDHEIGHT - (ypos+15 - 2), false, 0, 2, -1,-1,-1);
 		}
 
 		V_DrawRightAlignedThinString(
 			BASEVIDWIDTH - 12, BASEVIDHEIGHT - (ypos+15),
 			V_ALLOWLOWERCASE, va("= %s", accepttext)
 		);
-		GamepadGlyphs(BASEVIDWIDTH - 12 - V_ThinStringWidth("[ENTER] ",0) - 1, BASEVIDHEIGHT - (ypos+15 - 2), 0);
+		V_DrawGamepadGlyph(BASEVIDWIDTH - 12 - V_ThinStringWidth("[ENTER] ",0) - 1, BASEVIDHEIGHT - (ypos+15 - 2), false, 0, 0, -1,-1,-1);
 	}
 }
 //
